@@ -5,18 +5,19 @@
 typedef struct buf{
         char buffer[512];
         int len;
-        
 } text;
 
-int spacing = 25;
+int spacing = 10;
 int main(){
-
+        SetTraceLogLevel(LOG_ERROR);
         InitWindow(800,600,"fiza");
-        int cX = 100;
         int cY = 100;
         text txt;
         txt.len = 0;
         txt.buffer[txt.len+1] = '\0';
+        
+        int tWidth = MeasureText(txt.buffer, 25) + 100;
+        SetMouseCursor(MOUSE_CURSOR_IBEAM);
         
         //render loop
         while(!WindowShouldClose()){
@@ -27,22 +28,24 @@ int main(){
                         txt.buffer[txt.len] = (char)key;
                         txt.buffer[txt.len+1] = '\0';
                         txt.len+=1;
-                        cX+=spacing;
-                        printf("DEBUG: %s",txt.buffer);
-                }
 
-                if(key==KEY_BACKSPACE){
+                        printf("BUFFER: %s\n",txt.buffer);
+                        printf("KEY PRESSED: %c\n",txt.buffer[txt.len-1]);
+                } else if(IsKeyPressed(KEY_BACKSPACE)) {
                         txt.len-=1;
-                        txt.buffer[txt.len]=' ';
+                        txt.buffer[txt.len]='\0';
                 }
 
                 ClearBackground(BLACK);
+                
                 BeginDrawing();
                 
+                int tWidth = MeasureText(txt.buffer, 25)+100;
                 if((int)GetTime()%2==0)
-                        DrawRectangleLines(cX, cY, 2, 20, GRAY);
+                        DrawRectangleLines(tWidth, cY, 2, 20, GRAY);
                 
                 DrawText(txt.buffer, 100, 100, 25, GRAY);
+                printf("twidth = %d\n",tWidth);
                 EndDrawing();
         }
 
