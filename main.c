@@ -1,22 +1,32 @@
 #include <unistd.h>
 #include <raylib.h>
 #include <stdio.h>
+#include <math.h>
+#include <malloc.h>
 
 typedef struct buf{
         char buffer[512];
         int len;
 } text;
 
-int spacing = 10;
+
+
+
+text* buffer_init(){
+        text* txt = (text*)malloc(sizeof(text));
+        txt->len = 0;
+        txt->buffer[txt->len+1] = '\0';
+        return txt;
+}
+
 int main(){
+
         SetTraceLogLevel(LOG_ERROR);
         InitWindow(800,600,"fiza");
-        int cY = 100;
-        text txt;
-        txt.len = 0;
-        txt.buffer[txt.len+1] = '\0';
+        int cursorY = 100;
+        text* txt = buffer_init();
         
-        int tWidth = MeasureText(txt.buffer, 25) + 100;
+        int cursorX = MeasureText(txt->buffer, 25) + 100;
         SetMouseCursor(MOUSE_CURSOR_IBEAM);
         
         //render loop
@@ -25,27 +35,50 @@ int main(){
 
                 int key = GetCharPressed();
                 if(key >= 32 && key<=125){
-                        txt.buffer[txt.len] = (char)key;
-                        txt.buffer[txt.len+1] = '\0';
-                        txt.len+=1;
+                        txt->buffer[txt->len] = (char)key;
+                        txt->buffer[txt->len+1] = '\0';
+                        txt->len+=1;
+                        int cursorX = MeasureText(txt->buffer, 25)+100;
 
-                        printf("BUFFER: %s\n",txt.buffer);
-                        printf("KEY PRESSED: %c\n",txt.buffer[txt.len-1]);
-                } else if(IsKeyPressed(KEY_BACKSPACE)) {
-                        txt.len-=1;
-                        txt.buffer[txt.len]='\0';
+                        printf("BUFFER: %s\n",txt->buffer);
+                        printf("KEY PRESSED: %c\n",txt->buffer[txt->len-1]);
+                }
+
+                if(IsKeyPressed(KEY_BACKSPACE)) {
+                        if(txt->len>0){
+                        txt->len-=1;
+                        txt->buffer[txt->len]='\0';
+                        int cursorX = MeasureText(txt->buffer, 25)+100;
+                }}
+
+                if(IsKeyPressed(KEY_ENTER)){
+                        txt->buffer[txt->len] = '\n';  
+                        txt->len+=1;
+                        txt->buffer[txt->len] = '\0';
+                        
+                        //Vector2 d = MeasureTextEx(GetFontDefault(), txt.buffer, 25, 0);
+                        //cursorY+=d.y;
+                        //cursorX=100;
+                }
+                
+                if(IsKeyPressed(KEY_RIGHT_CONTROL)){
+                        printf("saved! \n");
+                        SaveFileText("note.txt", txt->buffer);
+
                 }
 
                 ClearBackground(BLACK);
-                
+
+                //drawing
                 BeginDrawing();
                 
-                int tWidth = MeasureText(txt.buffer, 25)+100;
-                if((int)GetTime()%2==0)
-                        DrawRectangleLines(tWidth, cY, 2, 20, GRAY);
+                int cursorX = MeasureText(txt->buffer, 25)+100;
+                //cursor
+                if(fmod(GetTime(), 0.5f)<0.25)
+                        DrawRectangleLines(cursorX, cursorY, 2, 20, GRAY);
                 
-                DrawText(txt.buffer, 100, 100, 25, GRAY);
-                printf("twidth = %d\n",tWidth);
+                //buffer
+                DrawText(txt->buffer, 100, 100, 25, GRAY);
                 EndDrawing();
         }
 
